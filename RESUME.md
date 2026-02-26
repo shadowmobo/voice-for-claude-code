@@ -35,7 +35,8 @@ Extension shows "Loading Whisper model" spinner. May need full VS Code restart t
 ---
 
 ## Project Location
-`C:\Users\AMD\Documents\Claude Code Projects\Skills\Voice for Claude Code`
+- Local: `C:\Users\AMD\Documents\Claude Code Projects\Skills\Voice for Claude Code`
+- GitHub: https://github.com/shadowmobo/voice-for-claude-code
 
 ## Key Files
 - `src/extension.ts` - Main extension entry point
