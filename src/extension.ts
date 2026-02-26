@@ -143,9 +143,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
     // Start Python backend
     statusBar.setState('loading');
+    console.log('[Voice Input] Starting Python backend...');
+
     try {
         await pythonBridge.start(context.extensionPath);
         statusBar.setState('idle');
+        console.log('[Voice Input] Python backend started successfully');
 
         // Send initial config
         const config = ConfigManager.getConfig();
@@ -156,14 +159,27 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
         vscode.window.setStatusBarMessage('Voice Input ready', 3000);
     } catch (error) {
+        console.error('[Voice Input] Failed to start Python backend:', error);
         statusBar.setState('idle');
         statusBar.showError('Setup Error', 5000);
 
         const message = error instanceof Error ? error.message : String(error);
+
+        // Show more helpful error message
+        const config = vscode.workspace.getConfiguration('voiceInput');
+        const pythonPath = config.get<string>('pythonPath') || 'python';
+
         vscode.window.showErrorMessage(
-            `Voice Input: Failed to start. ${message}. ` +
-            'Make sure Python and Whisper are installed.'
-        );
+            `Voice Input: Failed to start. ${message}`,
+            'Open Settings'
+        ).then(selection => {
+            if (selection === 'Open Settings') {
+                vscode.commands.executeCommand('workbench.action.openSettings', 'voiceInput.pythonPath');
+            }
+        });
+
+        console.error(`[Voice Input] Python path was: ${pythonPath}`);
+        console.error('[Voice Input] Check that the path is correct and Python has whisper installed');
     }
 
     console.log('[Voice Input] Extension activated');

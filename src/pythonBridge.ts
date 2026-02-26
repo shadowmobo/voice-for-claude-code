@@ -35,18 +35,65 @@ export class PythonBridge {
     }
 
     /**
+     * Find the best Python path to use.
+     */
+    private findPythonPath(extensionPath: string): string {
+        const config = vscode.workspace.getConfiguration('voiceInput');
+        const configuredPath = config.get<string>('pythonPath');
+
+        // If user configured a specific path, use it
+        if (configuredPath && configuredPath !== 'python') {
+            return configuredPath;
+        }
+
+        // Check for bundled venv in extension directory
+        const fs = require('fs');
+        const venvPaths = [
+            path.join(extensionPath, 'python', 'venv', 'Scripts', 'python.exe'), // Windows
+            path.join(extensionPath, 'python', 'venv', 'bin', 'python'), // Unix
+            path.join(extensionPath, 'python', '.venv', 'Scripts', 'python.exe'), // Windows alt
+            path.join(extensionPath, 'python', '.venv', 'bin', 'python'), // Unix alt
+        ];
+
+        for (const venvPath of venvPaths) {
+            if (fs.existsSync(venvPath)) {
+                console.log(`[Voice Input] Found bundled venv: ${venvPath}`);
+                return venvPath;
+            }
+        }
+
+        // Fall back to system Python
+        return configuredPath || 'python';
+    }
+
+    /**
      * Start the Python backend process.
      */
     async start(extensionPath: string): Promise<void> {
-        // Get Python path from settings
-        const config = vscode.workspace.getConfiguration('voiceInput');
-        const pythonPath = config.get<string>('pythonPath') || 'python';
+        // Find the best Python path
+        const pythonPath = this.findPythonPath(extensionPath);
         const scriptPath = path.join(extensionPath, 'python', 'main.py');
 
-        // Create ready promise
-        this.readyPromise = new Promise((resolve) => {
+        console.log(`[Voice Input] Starting Python: ${pythonPath}`);
+        console.log(`[Voice Input] Script path: ${scriptPath}`);
+
+        // Create ready promise with timeout
+        let readyReject: ((err: Error) => void) | null = null;
+        this.readyPromise = new Promise((resolve, reject) => {
             this.readyResolve = resolve;
+            readyReject = reject;
         });
+
+        // Set timeout for ready signal (10 seconds)
+        const timeoutId = setTimeout(() => {
+            if (!this.isReady) {
+                const err = new Error('Python backend timed out. Check Debug Console for errors.');
+                if (readyReject) {
+                    readyReject(err);
+                }
+                this.shutdown();
+            }
+        }, 10000);
 
         // Spawn Python process
         this.process = spawn(pythonPath, [scriptPath], {
@@ -62,6 +109,7 @@ export class PythonBridge {
             });
 
             rl.on('line', (line) => {
+                console.log('[Voice Input] Python stdout:', line);
                 this.handleLine(line);
             });
         }
@@ -69,27 +117,43 @@ export class PythonBridge {
         // Handle stderr - log errors
         if (this.process.stderr) {
             this.process.stderr.on('data', (data) => {
-                console.error('[Voice Input Python]', data.toString());
+                console.error('[Voice Input Python stderr]', data.toString());
             });
         }
 
         // Handle process exit
         this.process.on('exit', (code, signal) => {
             console.log(`[Voice Input] Python process exited with code ${code}, signal ${signal}`);
+            clearTimeout(timeoutId);
             this.isReady = false;
             this.process = null;
+
+            // If we haven't received ready yet, reject the promise
+            if (this.readyResolve && readyReject) {
+                readyReject(new Error(`Python process exited unexpectedly (code: ${code})`));
+            }
         });
 
         this.process.on('error', (err) => {
             console.error('[Voice Input] Failed to start Python process:', err);
+            clearTimeout(timeoutId);
+            if (readyReject) {
+                readyReject(err);
+            }
             this.messageHandler({
                 type: 'error',
                 message: `Failed to start Python: ${err.message}. Check voiceInput.pythonPath setting.`,
             });
         });
 
-        // Wait for ready signal
-        await this.readyPromise;
+        // Wait for ready signal (with timeout)
+        try {
+            await this.readyPromise;
+            clearTimeout(timeoutId);
+        } catch (err) {
+            clearTimeout(timeoutId);
+            throw err;
+        }
     }
 
     /**
