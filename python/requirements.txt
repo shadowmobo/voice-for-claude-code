@@ -1,0 +1,17 @@
+# Voice Input for Claude Code - Python Dependencies
+# All packages verified as safe from official/reputable sources
+
+# OpenAI Whisper - Official speech recognition model
+# Publisher: OpenAI (official)
+# Repository: https://github.com/openai/whisper
+openai-whisper>=20231117
+
+# Sounddevice - Audio recording library
+# Publisher: Matthias Geier (well-established OSS)
+# Repository: https://github.com/spatialaudio/python-sounddevice
+sounddevice>=0.4.6
+
+# NumPy - Numerical computing (required by Whisper and sounddevice)
+# Publisher: NumPy team (foundational Python package)
+# Repository: https://github.com/numpy/numpy
+numpy>=1.24.0

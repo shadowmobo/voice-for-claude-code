@@ -1,0 +1,98 @@
+{
+  "name": "voice-for-claude-code",
+  "displayName": "Voice Input for Claude Code",
+  "description": "Voice-to-text input using local Whisper, optimized for Claude Code terminal",
+  "version": "0.1.0",
+  "publisher": "voice-claude",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "voice",
+    "speech-to-text",
+    "whisper",
+    "claude",
+    "dictation"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "voiceInput.toggleRecording",
+        "title": "Voice Input: Toggle Recording"
+      },
+      {
+        "command": "voiceInput.startRecording",
+        "title": "Voice Input: Start Recording"
+      },
+      {
+        "command": "voiceInput.stopRecording",
+        "title": "Voice Input: Stop Recording"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "voiceInput.toggleRecording",
+        "key": "ctrl+shift+v",
+        "mac": "cmd+shift+v",
+        "when": "terminalFocus || editorFocus"
+      }
+    ],
+    "configuration": {
+      "title": "Voice Input",
+      "properties": {
+        "voiceInput.pythonPath": {
+          "type": "string",
+          "default": "python",
+          "description": "Path to Python interpreter with Whisper installed"
+        },
+        "voiceInput.whisperModel": {
+          "type": "string",
+          "default": "base",
+          "enum": [
+            "tiny",
+            "base",
+            "small",
+            "medium",
+            "large"
+          ],
+          "enumDescriptions": [
+            "Tiny (~1GB RAM, fastest, least accurate)",
+            "Base (~1GB RAM, good balance)",
+            "Small (~2GB RAM, better accuracy)",
+            "Medium (~5GB RAM, high accuracy)",
+            "Large (~10GB RAM, best accuracy, slowest)"
+          ],
+          "description": "Whisper model size (larger = more accurate but slower)"
+        },
+        "voiceInput.language": {
+          "type": "string",
+          "default": "",
+          "description": "Language code for transcription (e.g., 'en' for English). Leave empty for auto-detect."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "security:npm": "npm audit --audit-level=moderate",
+    "security:all": "npm audit && pip-audit -r python/requirements.txt"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^8.56.1",
+    "@typescript-eslint/parser": "^8.56.1",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.3"
+  }
+}

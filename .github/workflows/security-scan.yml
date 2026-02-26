@@ -1,0 +1,106 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Weekly scan every Sunday at midnight UTC
+    - cron: '0 0 * * 0'
+
+jobs:
+  npm-audit:
+    name: NPM Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate
+
+  pip-audit:
+    name: Python Pip Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pip-audit
+        run: pip install pip-audit
+
+      - name: Run pip-audit
+        run: pip-audit -r python/requirements.txt
+
+  snyk-npm:
+    name: Snyk NPM Scan
+    runs-on: ubuntu-latest
+    # Only run if SNYK_TOKEN is configured
+    if: ${{ vars.SNYK_ENABLED == 'true' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Snyk for Node.js
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=medium
+
+  snyk-python:
+    name: Snyk Python Scan
+    runs-on: ubuntu-latest
+    # Only run if SNYK_TOKEN is configured
+    if: ${{ vars.SNYK_ENABLED == 'true' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run Snyk for Python
+        uses: snyk/actions/python@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --file=python/requirements.txt --severity-threshold=medium
+
+  socket:
+    name: Socket.dev Supply Chain Scan
+    runs-on: ubuntu-latest
+    # Only run if SOCKET_TOKEN is configured
+    if: ${{ vars.SOCKET_ENABLED == 'true' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Socket.dev scan
+        uses: socketdev/socket-cli-action@v1
+        with:
+          token: ${{ secrets.SOCKET_TOKEN }}

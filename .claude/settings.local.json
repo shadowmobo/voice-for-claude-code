@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "Bash(npm install)",
+      "Bash(npm audit:*)",
+      "Bash(npm run compile:*)",
+      "Bash(ffmpeg:*)",
+      "Bash(choco --version:*)",
+      "Bash(choco install:*)",
+      "Bash(test:*)",
+      "Bash(python -m venv:*)",
+      "Bash(\"C:/Users/AMD/Documents/Claude Code Projects/Skills/Voice for Claude Code/python/venv/Scripts/pip.exe\" install -r \"C:/Users/AMD/Documents/Claude Code Projects/Skills/Voice for Claude Code/python/requirements.txt\")",
+      "Bash(\"C:/Users/AMD/Documents/Claude Code Projects/Skills/Voice for Claude Code/python/venv/Scripts/python.exe\" -c:*)",
+      "Bash(taskkill:*)",
+      "Bash(git init:*)",
+      "Bash(git branch:*)",
+      "Bash(gh auth status:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}

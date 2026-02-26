@@ -1,0 +1,25 @@
+# Node
+node_modules/
+out/
+*.vsix
+
+# Python
+python/__pycache__/
+python/*.pyc
+python/venv/
+python/.venv/
+*.egg-info/
+
+# IDE
+.vscode-test/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets
+.env
+.env.local
+*.key
+*.pem
