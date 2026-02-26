@@ -88,7 +88,7 @@
     "security:all": "npm audit && pip-audit -r python/requirements.txt"
   },
   "devDependencies": {
-    "@types/node": "^20.11.0",
+    "@types/node": "^25.3.2",
     "@types/vscode": "^1.85.0",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
