@@ -14,4 +14,4 @@ sounddevice>=0.4.6
 # NumPy - Numerical computing (required by Whisper and sounddevice)
 # Publisher: NumPy team (foundational Python package)
 # Repository: https://github.com/numpy/numpy
-numpy>=1.24.0
+numpy>=2.4.4
