@@ -4,7 +4,7 @@
 # OpenAI Whisper - Official speech recognition model
 # Publisher: OpenAI (official)
 # Repository: https://github.com/openai/whisper
-openai-whisper>=20231117
+openai-whisper>=20250625
 
 # Sounddevice - Audio recording library
 # Publisher: Matthias Geier (well-established OSS)
